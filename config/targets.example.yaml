@@ -1,0 +1,7 @@
+# Alpha-AI authorization whitelist
+# Copy to config/targets.yaml and edit. Tools refuse to run against targets not listed here.
+authorized_targets:
+  - 127.0.0.1
+  - localhost
+  - 192.168.56.0/24    # CIDR ranges supported
+  - "*.lab.internal"   # Glob patterns supported

@@ -2,7 +2,7 @@
 
 > Agentic AI offensive-security framework — MCP server + REST API exposing 50+ security tools to LLMs for autonomous penetration testing.
 
-Inspired by [HexStrike AI](https://github.com/0x4m4/hexstrike-ai/), Alpha-AI lets a Claude/GPT/Copilot agent autonomously chain reconnaissance → vulnerability discovery → exploitation → reporting against authorized targets.
+Alpha-AI lets a Claude/GPT/Copilot agent autonomously chain reconnaissance → vulnerability discovery → exploitation → reporting against authorized targets.
 
 ## Architecture
 

@@ -52,6 +52,30 @@ async def nmap_scan(
 
 
 @mcp.tool()
+async def masscan_scan(
+    target: str,
+    ports: str = "1-1000",
+    rate: int = 1000,
+) -> dict:
+    """High-speed port scan with masscan against an authorized target (requires root)."""
+    result = await _dispatch.run_tool("masscan", target=target, ports=ports, rate=rate)
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
+async def subfinder_scan(
+    target: str,
+    all_sources: bool = False,
+    recursive: bool = False,
+) -> dict:
+    """Passive subdomain enumeration for a root domain with subfinder."""
+    result = await _dispatch.run_tool(
+        "subfinder", target=target, all_sources=all_sources, recursive=recursive
+    )
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
 async def nuclei_scan(
     target: str,
     severity: str | None = None,
@@ -124,6 +148,33 @@ async def sqlmap_scan(
 
 
 @mcp.tool()
+async def nikto_scan(
+    target: str,
+    port: int | None = None,
+    ssl: bool = False,
+    tuning: str | None = None,
+) -> dict:
+    """Web server misconfiguration and vulnerability scan with nikto."""
+    result = await _dispatch.run_tool(
+        "nikto", target=target, port=port, ssl=ssl, tuning=tuning
+    )
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
+async def wpscan_scan(
+    target: str,
+    enumerate: str = "vp,vt,u",
+    api_token: str | None = None,
+) -> dict:
+    """WordPress vulnerability scan (core, plugins, themes, users) with wpscan."""
+    result = await _dispatch.run_tool(
+        "wpscan", target=target, enumerate=enumerate, api_token=api_token
+    )
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
 async def enum4linux_scan(
     target: str,
     aggressive: bool = False,
@@ -191,6 +242,28 @@ async def hydra_scan(
         port=port,
         threads=threads,
         stop_on_first=stop_on_first,
+    )
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
+async def kerbrute_scan(
+    target: str,
+    domain: str,
+    mode: str = "userenum",
+    userlist: str | None = None,
+    password: str | None = None,
+    dc: str | None = None,
+) -> dict:
+    """Kerberos user enumeration / password spraying against a DC with kerbrute."""
+    result = await _dispatch.run_tool(
+        "kerbrute",
+        target=target,
+        domain=domain,
+        mode=mode,
+        userlist=userlist,
+        password=password,
+        dc=dc,
     )
     return result.model_dump(mode="json")
 

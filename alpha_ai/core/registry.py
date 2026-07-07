@@ -55,11 +55,16 @@ registry = ToolRegistry()
 def load_builtin_tools() -> None:
     """Import all built-in tool modules so they self-register."""
     from alpha_ai.tools.recon import nmap as _nmap  # noqa: F401
+    from alpha_ai.tools.recon import masscan as _masscan  # noqa: F401
+    from alpha_ai.tools.recon import subfinder as _subfinder  # noqa: F401
     from alpha_ai.tools.web import nuclei as _nuclei  # noqa: F401
     from alpha_ai.tools.web import gobuster as _gobuster  # noqa: F401
     from alpha_ai.tools.web import ffuf as _ffuf  # noqa: F401
     from alpha_ai.tools.web import sqlmap as _sqlmap  # noqa: F401
+    from alpha_ai.tools.web import nikto as _nikto  # noqa: F401
+    from alpha_ai.tools.web import wpscan as _wpscan  # noqa: F401
     from alpha_ai.tools.network import enum4linux as _enum4linux  # noqa: F401
     from alpha_ai.tools.network import crackmapexec as _crackmapexec  # noqa: F401
+    from alpha_ai.tools.ad import kerbrute as _kerbrute  # noqa: F401
     from alpha_ai.tools.cred import hydra as _hydra  # noqa: F401
     from alpha_ai.tools.exploit import searchsploit as _searchsploit  # noqa: F401

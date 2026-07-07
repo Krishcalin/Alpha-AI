@@ -67,17 +67,22 @@ docker run -it --rm alpha-ai alpha-mcp
 docker run -it --rm -p 8000:8000 alpha-ai alpha-api
 ```
 
-## Tools (MVP)
+## Tools
 
 | Category | Tool | Status |
 |----------|------|:------:|
 | Recon | nmap | ✅ |
+| Recon | masscan | ✅ |
+| Recon | subfinder | ✅ |
 | Web | nuclei | ✅ |
 | Web | gobuster | ✅ |
 | Web | ffuf | ✅ |
 | Web | sqlmap | ✅ |
+| Web | nikto | ✅ |
+| Web | wpscan | ✅ |
 | Network | enum4linux | ✅ |
 | Network | crackmapexec | ✅ |
+| AD | kerbrute | ✅ |
 | Cred | hydra | ✅ |
 | Exploit | searchsploit | ✅ |
 

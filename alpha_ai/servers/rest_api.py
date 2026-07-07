@@ -36,6 +36,20 @@ class NmapRequest(BaseModel):
     use_cache: bool = True
 
 
+class MasscanRequest(BaseModel):
+    target: str
+    ports: str = "1-1000"
+    rate: int = 1000
+    use_cache: bool = True
+
+
+class SubfinderRequest(BaseModel):
+    target: str
+    all_sources: bool = False
+    recursive: bool = False
+    use_cache: bool = True
+
+
 class NucleiRequest(BaseModel):
     target: str
     severity: str | None = None
@@ -69,6 +83,31 @@ class SqlmapRequest(BaseModel):
     level: int = Field(default=1, ge=1, le=5)
     risk: int = Field(default=1, ge=1, le=3)
     technique: str = "BEUSTQ"
+    use_cache: bool = True
+
+
+class NiktoRequest(BaseModel):
+    target: str
+    port: int | None = None
+    ssl: bool = False
+    tuning: str | None = None
+    use_cache: bool = True
+
+
+class WpscanRequest(BaseModel):
+    target: str
+    enumerate: str = "vp,vt,u"
+    api_token: str | None = None
+    use_cache: bool = True
+
+
+class KerbruteRequest(BaseModel):
+    target: str
+    domain: str
+    mode: str = "userenum"
+    userlist: str | None = None
+    password: str | None = None
+    dc: str | None = None
     use_cache: bool = True
 
 
@@ -144,6 +183,28 @@ async def run_nmap(req: NmapRequest) -> dict:
     )
 
 
+@app.post("/tools/masscan")
+async def run_masscan(req: MasscanRequest) -> dict:
+    return await _invoke(
+        "masscan",
+        req.target,
+        use_cache=req.use_cache,
+        ports=req.ports,
+        rate=req.rate,
+    )
+
+
+@app.post("/tools/subfinder")
+async def run_subfinder(req: SubfinderRequest) -> dict:
+    return await _invoke(
+        "subfinder",
+        req.target,
+        use_cache=req.use_cache,
+        all_sources=req.all_sources,
+        recursive=req.recursive,
+    )
+
+
 @app.post("/tools/nuclei")
 async def run_nuclei(req: NucleiRequest) -> dict:
     return await _invoke(
@@ -193,6 +254,43 @@ async def run_sqlmap(req: SqlmapRequest) -> dict:
         level=req.level,
         risk=req.risk,
         technique=req.technique,
+    )
+
+
+@app.post("/tools/nikto")
+async def run_nikto(req: NiktoRequest) -> dict:
+    return await _invoke(
+        "nikto",
+        req.target,
+        use_cache=req.use_cache,
+        port=req.port,
+        ssl=req.ssl,
+        tuning=req.tuning,
+    )
+
+
+@app.post("/tools/wpscan")
+async def run_wpscan(req: WpscanRequest) -> dict:
+    return await _invoke(
+        "wpscan",
+        req.target,
+        use_cache=req.use_cache,
+        enumerate=req.enumerate,
+        api_token=req.api_token,
+    )
+
+
+@app.post("/tools/kerbrute")
+async def run_kerbrute(req: KerbruteRequest) -> dict:
+    return await _invoke(
+        "kerbrute",
+        req.target,
+        use_cache=req.use_cache,
+        domain=req.domain,
+        mode=req.mode,
+        userlist=req.userlist,
+        password=req.password,
+        dc=req.dc,
     )
 
 

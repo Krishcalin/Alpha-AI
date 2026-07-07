@@ -14,7 +14,7 @@ enum4linux, crackmapexec, hydra, searchsploit, …) are expected on `$PATH`.
 **Repository**: https://github.com/Krishcalin/Alpha-AI
 **License**: MIT
 **Python**: 3.11+
-**Status**: MVP — 9 tools wrapped (recon, web, network, cred, exploit), 21 tests passing
+**Status**: Phase 2 in progress — 14 tools wrapped (recon, web, network, AD, cred, exploit), 31 tests passing (excl. Linux-only runner tests)
 
 ---
 
@@ -137,16 +137,21 @@ subclass) if the target is not whitelisted. The REST API maps this to HTTP 403.
 | Category | Tool         | Module                                       | Severity policy                                   |
 |----------|--------------|----------------------------------------------|---------------------------------------------------|
 | Recon    | nmap         | `tools/recon/nmap.py`                        | INFO per open port                                |
+| Recon    | masscan      | `tools/recon/masscan.py` (requires root)     | INFO per open port                                |
+| Recon    | subfinder    | `tools/recon/subfinder.py`                   | INFO per discovered subdomain                     |
 | Web      | nuclei       | `tools/web/nuclei.py`                        | Maps nuclei severity 1:1                          |
 | Web      | gobuster     | `tools/web/gobuster.py`                      | Sensitive paths → MEDIUM, 200s → LOW              |
 | Web      | ffuf         | `tools/web/ffuf.py`                          | 200s → LOW, others → INFO                         |
 | Web      | sqlmap       | `tools/web/sqlmap.py`                        | Always CRITICAL on injection point                |
+| Web      | nikto        | `tools/web/nikto.py`                         | MEDIUM per reported item                          |
+| Web      | wpscan       | `tools/web/wpscan.py`                        | HIGH per vuln (with CVE), INFO for findings       |
 | Network  | enum4linux   | `tools/network/enum4linux.py`                | Disk shares → MEDIUM, users → LOW, OS → INFO      |
 | Network  | crackmapexec | `tools/network/crackmapexec.py`              | `Pwn3d!` → CRITICAL, other `[+]` → HIGH           |
+| AD       | kerbrute     | `tools/ad/kerbrute.py`                        | VALID LOGIN → CRITICAL, VALID USERNAME → LOW      |
 | Cred     | hydra        | `tools/cred/hydra.py`                        | Always CRITICAL on valid credentials              |
 | Exploit  | searchsploit | `tools/exploit/searchsploit.py` (local-only) | webapps/remote → HIGH, local/dos → MEDIUM         |
 
-**9 tools, all flow through the same dispatcher.**
+**14 tools, all flow through the same dispatcher.**
 
 ---
 
@@ -343,12 +348,15 @@ curl http://localhost:8000/health
 - [x] Dockerfile (Kali base) with all binaries preinstalled
 - [x] Authorization model with `requires_authorization` opt-out
 
-### Phase 2 — Tool breadth
-- [ ] Recon: masscan, amass, subfinder, dnsrecon
-- [ ] Web: nikto, wpscan, wfuzz
-- [ ] AD: impacket-secretsdump, kerbrute, certipy, bloodhound-python
+### Phase 2 — Tool breadth (IN PROGRESS)
+- [ ] Recon: masscan ✅, subfinder ✅, amass, dnsrecon
+- [ ] Web: nikto ✅, wpscan ✅, wfuzz
+- [ ] AD: kerbrute ✅, impacket-secretsdump, certipy, bloodhound-python
 - [ ] Cred: john, hashcat (local-only — `requires_authorization=False`)
 - [ ] Post: linpeas/winpeas wrappers (require uploaded result file)
+
+First batch (5 tools) complete: `masscan`, `subfinder` (recon), `nikto`, `wpscan` (web),
+`kerbrute` (opens the AD category). +12 parser tests (`tests/test_parsers_phase4.py`).
 
 ### Phase 3 — Orchestration
 - [ ] `agents/autopilot.py` — LLM-driven loop that picks the next tool from prior findings

@@ -194,6 +194,16 @@ class HashcatRequest(BaseModel):
     use_cache: bool = True
 
 
+class LinpeasRequest(BaseModel):
+    target: str
+    use_cache: bool = True
+
+
+class WinpeasRequest(BaseModel):
+    target: str
+    use_cache: bool = True
+
+
 class SearchsploitRequest(BaseModel):
     query: str
     exclude: str | None = None
@@ -456,6 +466,16 @@ async def run_hashcat(req: HashcatRequest) -> dict:
         attack_mode=req.attack_mode,
         rules=req.rules,
     )
+
+
+@app.post("/tools/linpeas")
+async def run_linpeas(req: LinpeasRequest) -> dict:
+    return await _invoke("linpeas", req.target, use_cache=req.use_cache)
+
+
+@app.post("/tools/winpeas")
+async def run_winpeas(req: WinpeasRequest) -> dict:
+    return await _invoke("winpeas", req.target, use_cache=req.use_cache)
 
 
 @app.post("/tools/searchsploit")

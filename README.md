@@ -90,6 +90,8 @@ docker run -it --rm -p 8000:8000 alpha-ai alpha-api
 | Cred | john | ✅ |
 | Cred | hashcat | ✅ |
 | Exploit | searchsploit | ✅ |
+| Post | linpeas | ✅ |
+| Post | winpeas | ✅ |
 
 ## Authorization
 

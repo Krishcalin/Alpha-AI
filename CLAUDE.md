@@ -14,7 +14,7 @@ enum4linux, crackmapexec, hydra, searchsploit, …) are expected on `$PATH`.
 **Repository**: https://github.com/Krishcalin/Alpha-AI
 **License**: MIT
 **Python**: 3.11+
-**Status**: Phase 2 in progress — 19 tools wrapped (recon, web, network, AD, cred, exploit), 47 tests passing (excl. Linux-only runner tests)
+**Status**: Phase 2 — all category blocks done (recon, web, network, AD, cred, exploit, post); 21 tools wrapped, 52 tests passing (excl. Linux-only runner tests). Optional fill-ins remain: amass, dnsrecon, wfuzz.
 
 ---
 
@@ -155,8 +155,10 @@ subclass) if the target is not whitelisted. The REST API maps this to HTTP 403.
 | Cred     | john         | `tools/cred/john.py` (local-only)            | CRITICAL per cracked plaintext credential         |
 | Cred     | hashcat      | `tools/cred/hashcat.py` (local-only)         | CRITICAL per cracked hash (`--quiet` hash:plain)  |
 | Exploit  | searchsploit | `tools/exploit/searchsploit.py` (local-only) | webapps/remote → HIGH, local/dos → MEDIUM         |
+| Post     | linpeas      | `tools/post/linpeas.py` (ingest-only)        | PEASS 99% vector → CRITICAL, highlight → HIGH     |
+| Post     | winpeas      | `tools/post/winpeas.py` (ingest-only)        | PEASS 99% vector → CRITICAL, highlight → HIGH     |
 
-**19 tools, all flow through the same dispatcher.**
+**21 tools, all flow through the same dispatcher.**
 
 ---
 
@@ -353,12 +355,12 @@ curl http://localhost:8000/health
 - [x] Dockerfile (Kali base) with all binaries preinstalled
 - [x] Authorization model with `requires_authorization` opt-out
 
-### Phase 2 — Tool breadth (IN PROGRESS)
+### Phase 2 — Tool breadth (CATEGORY BLOCKS COMPLETE)
 - [ ] Recon: masscan ✅, subfinder ✅, amass, dnsrecon
 - [ ] Web: nikto ✅, wpscan ✅, wfuzz
 - [x] AD: kerbrute ✅, impacket-secretsdump ✅, certipy ✅, bloodhound-python ✅
 - [x] Cred: john ✅, hashcat ✅ (local-only — `requires_authorization=False`)
-- [ ] Post: linpeas/winpeas wrappers (require uploaded result file)
+- [x] Post: linpeas ✅, winpeas ✅ (ingest-only — parse an uploaded PEASS output file)
 
 First batch (5 tools) complete: `masscan`, `subfinder` (recon), `nikto`, `wpscan` (web),
 `kerbrute` (opens the AD category). +12 parser tests (`tests/test_parsers_phase4.py`).
@@ -370,6 +372,14 @@ AD batch (3 tools) complete: `secretsdump` (hash dump / DCSync), `certipy` (ADCS
 Cred batch (2 tools) complete: `john`, `hashcat` — local-only offline crackers
 (`requires_authorization=False`, target is the hash file). Closes the loop from
 secretsdump: dumped NTLM hashes → cracked plaintext. +6 parser tests (`tests/test_parsers_phase6.py`).
+
+Post batch (2 tools) complete: `linpeas`, `winpeas` — ingest-only (no subprocess;
+the operator captures PEASS-ng output on the compromised host and uploads the file).
+One shared pure parser (`parsers/peass.py`) keys on PEASS color highlights:
+red-on-yellow (`\x1b[1;31;103m`) = 99% PE vector → CRITICAL, bold-red → HIGH; falls
+back to an INFO note when a capture stripped ANSI. The wrapper synthesizes a
+CommandResult (sentinel `<ingest>` binary) so the ToolResult shape stays uniform.
++5 parser tests (`tests/test_parsers_phase7.py`).
 
 ### Phase 3 — Orchestration
 - [ ] `agents/autopilot.py` — LLM-driven loop that picks the next tool from prior findings

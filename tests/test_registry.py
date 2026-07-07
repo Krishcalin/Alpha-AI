@@ -18,6 +18,8 @@ def test_builtin_tools_registered() -> None:
         "secretsdump", "certipy", "bloodhound",
         # Phase 2 — Cred block (local-only crackers)
         "john", "hashcat",
+        # Phase 2 — Post block (result-file ingest)
+        "linpeas", "winpeas",
     }
     assert expected <= names
 
@@ -32,3 +34,11 @@ def test_builtin_tools_registered() -> None:
     # the whole AD block shares the AD category
     for ad_tool in ("secretsdump", "certipy", "bloodhound"):
         assert registry.get(ad_tool).category is ToolCategory.AD
+
+    # john/hashcat and linpeas/winpeas are local-only — no authorization gate
+    for local_tool in ("john", "hashcat", "linpeas", "winpeas"):
+        assert registry.get(local_tool).requires_authorization is False
+    for cred_tool in ("john", "hashcat"):
+        assert registry.get(cred_tool).category is ToolCategory.CRED
+    for post_tool in ("linpeas", "winpeas"):
+        assert registry.get(post_tool).category is ToolCategory.POST

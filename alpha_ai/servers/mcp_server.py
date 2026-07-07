@@ -392,6 +392,20 @@ async def searchsploit_search(
     return result.model_dump(mode="json")
 
 
+@mcp.tool()
+async def linpeas_ingest(target: str) -> dict:
+    """Ingest a captured linpeas.sh output file and extract Linux privesc vectors (local-only; target is the file path)."""
+    result = await _dispatch.run_tool("linpeas", target=target)
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
+async def winpeas_ingest(target: str) -> dict:
+    """Ingest a captured winPEAS output file and extract Windows privesc vectors (local-only; target is the file path)."""
+    result = await _dispatch.run_tool("winpeas", target=target)
+    return result.model_dump(mode="json")
+
+
 def main() -> None:
     mcp.run()
 

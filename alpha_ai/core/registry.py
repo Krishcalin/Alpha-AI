@@ -73,3 +73,5 @@ def load_builtin_tools() -> None:
     from alpha_ai.tools.cred import john as _john  # noqa: F401
     from alpha_ai.tools.cred import hashcat as _hashcat  # noqa: F401
     from alpha_ai.tools.exploit import searchsploit as _searchsploit  # noqa: F401
+    from alpha_ai.tools.post import linpeas as _linpeas  # noqa: F401
+    from alpha_ai.tools.post import winpeas as _winpeas  # noqa: F401

@@ -204,6 +204,17 @@ class WinpeasRequest(BaseModel):
     use_cache: bool = True
 
 
+class WorkflowRequest(BaseModel):
+    target: str
+    template: str = "external-pentest"
+    domain: str | None = None
+    username: str | None = None
+    password: str | None = None
+    hashes: str | None = None
+    userlist: str | None = None
+    wordlist: str | None = None
+
+
 class SearchsploitRequest(BaseModel):
     query: str
     exclude: str | None = None
@@ -476,6 +487,22 @@ async def run_linpeas(req: LinpeasRequest) -> dict:
 @app.post("/tools/winpeas")
 async def run_winpeas(req: WinpeasRequest) -> dict:
     return await _invoke("winpeas", req.target, use_cache=req.use_cache)
+
+
+@app.post("/workflows")
+async def run_workflow(req: WorkflowRequest) -> dict:
+    from alpha_ai.agents.orchestrator import Orchestrator
+    from alpha_ai.agents.planner import Engagement
+
+    eng = Engagement(
+        target=req.target, domain=req.domain, username=req.username, password=req.password,
+        hashes=req.hashes, userlist=req.userlist, wordlist=req.wordlist,
+    )
+    try:
+        result = await Orchestrator(_dispatch).run(eng, req.template)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return result.model_dump(mode="json")
 
 
 @app.post("/tools/searchsploit")

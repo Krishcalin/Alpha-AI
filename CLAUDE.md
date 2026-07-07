@@ -14,7 +14,7 @@ enum4linux, crackmapexec, hydra, searchsploit, …) are expected on `$PATH`.
 **Repository**: https://github.com/Krishcalin/Alpha-AI
 **License**: MIT
 **Python**: 3.11+
-**Status**: Phase 2 — all category blocks done (recon, web, network, AD, cred, exploit, post); 21 tools wrapped, 52 tests passing (excl. Linux-only runner tests). Optional fill-ins remain: amass, dnsrecon, wfuzz.
+**Status**: Phase 3 — deterministic autopilot orchestrator (playbook engine + planner seam + finding dedup + 3 workflow templates). 21 tools wrapped, 70 tests passing (excl. Linux-only runner tests). Phase 2 optional fill-ins remain: amass, dnsrecon, wfuzz.
 
 ---
 
@@ -38,6 +38,7 @@ Alpha-AI/
 │   │   ├── cache.py            # ResultCache — sha256(tool, target, args) → JSON file
 │   │   ├── auth.py             # TargetAuthorizer — literals, CIDRs, globs; UnauthorizedTargetError
 │   │   ├── registry.py         # ToolSpec, ToolRegistry, global registry, load_builtin_tools()
+│   │   ├── dedup.py            # finding_key() + dedupe_findings() — collapse findings across runs
 │   │   └── logging.py          # structlog setup
 │   ├── parsers/                # Per-tool output → list[Finding]
 │   │   ├── nmap.py             # XML → open ports
@@ -53,20 +54,27 @@ Alpha-AI/
 │   │   ├── recon/nmap.py
 │   │   ├── web/{nuclei,gobuster,ffuf,sqlmap}.py
 │   │   ├── network/{enum4linux,crackmapexec}.py
-│   │   ├── cred/hydra.py
+│   │   ├── cred/{hydra,john,hashcat}.py
+│   │   ├── ad/{kerbrute,secretsdump,certipy,bloodhound}.py
+│   │   ├── post/{linpeas,winpeas}.py   # ingest-only (parse uploaded PEASS output)
 │   │   └── exploit/searchsploit.py
+│   ├── agents/                 # Phase 3 — autopilot orchestration
+│   │   ├── planner.py          # Step, Engagement, PlanContext, Planner protocol, RulePlanner
+│   │   ├── templates.py        # seed_steps() for external-pentest / internal-ad / web-app
+│   │   └── orchestrator.py     # Orchestrator loop → OrchestrationResult (seed→run→dedupe→plan)
 │   └── servers/
 │       ├── dispatcher.py       # Shared: authz → cache → tool fn → cache write
-│       ├── mcp_server.py       # FastMCP — stdio entrypoint `alpha-mcp`
-│       └── rest_api.py         # FastAPI — uvicorn entrypoint `alpha-api`
+│       ├── mcp_server.py       # FastMCP — stdio entrypoint `alpha-mcp` (+ run_workflow tool)
+│       └── rest_api.py         # FastAPI — uvicorn entrypoint `alpha-api` (+ POST /workflows)
 └── tests/
     ├── test_runner.py          # subprocess + timeout + missing-binary (Linux only)
     ├── test_auth.py            # whitelist literals/CIDR/glob
-    ├── test_parsers.py         # nmap, nuclei
-    ├── test_parsers_more.py    # gobuster, ffuf, sqlmap, enum4linux, crackmapexec
-    ├── test_parsers_phase3.py  # hydra, searchsploit
-    ├── test_registry.py        # all 9 tools self-register; flags asserted
-    └── test_dispatcher.py      # authz gate is bypassed for requires_authorization=False tools
+    ├── test_parsers*.py        # per-tool parsers (base + phase3–7: hydra…john/hashcat, peass)
+    ├── test_registry.py        # all 21 tools self-register; category + local-only flags asserted
+    ├── test_dispatcher.py      # authz gate bypassed for requires_authorization=False tools
+    ├── test_dedup.py           # Phase 3 — finding dedup (identity ignores timestamp)
+    ├── test_planner.py         # Phase 3 — RulePlanner rules + Planner protocol + gating
+    └── test_orchestrator.py    # Phase 3 — autopilot loop with a fake dispatcher
 ```
 
 ### Core design principles
@@ -381,10 +389,24 @@ back to an INFO note when a capture stripped ANSI. The wrapper synthesizes a
 CommandResult (sentinel `<ingest>` binary) so the ToolResult shape stays uniform.
 +5 parser tests (`tests/test_parsers_phase7.py`).
 
-### Phase 3 — Orchestration
-- [ ] `agents/autopilot.py` — LLM-driven loop that picks the next tool from prior findings
-- [ ] Finding deduplication across tool runs (hash by tool + target + evidence)
-- [ ] Workflow templates: "external pentest", "internal AD", "web app assessment"
+### Phase 3 — Orchestration (CORE COMPLETE)
+- [x] `agents/orchestrator.py` — autopilot loop: seed → run via dispatcher → dedupe → plan → repeat
+- [x] `agents/planner.py` — deterministic `RulePlanner` picks next tools from findings, behind a
+      `Planner` Protocol seam (an `LLMPlanner` can drop in later without touching the loop)
+- [x] Finding deduplication across tool runs (`core/dedup.py`, sha256 of tool+target+title+evidence)
+- [x] Workflow templates: `external-pentest`, `internal-ad`, `web-app` (`agents/templates.py`)
+- [x] Exposed on both surfaces: MCP `run_workflow` tool + REST `POST /workflows`
+- [x] 18 tests (`test_dedup.py`, `test_planner.py`, `test_orchestrator.py`)
+- [ ] Optional: `LLMPlanner` implementing the `Planner` seam (Anthropic SDK) — not yet needed
+- [ ] Deferred: auto-materialize secretsdump hashes → hashcat step (needs orchestrator file I/O)
+
+**Autopilot design.** The planner is deterministic and pure: a declarative rule table maps
+service/finding signals to follow-on tools (port 80 → nuclei+nikto+gobuster on `http://host`;
+445 → enum4linux+crackmapexec; 88+creds → kerbrute→secretsdump→bloodhound→certipy; 22/21/3389
++ wordlists → hydra). Credential/wordlist prerequisites gate each step — a step whose inputs are
+absent is simply not proposed. The `Orchestrator` runs every step at most once (keyed by
+tool+target+params), dedupes findings each round, and caps rounds+steps. Verified end-to-end: a
+single seeded nmap finding (ports 445+88) autonomously assembled the full AD kill chain.
 
 ### Phase 4 — Reporting
 - [ ] Markdown report generator (group findings by severity → tool → target)

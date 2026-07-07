@@ -93,6 +93,28 @@ docker run -it --rm -p 8000:8000 alpha-ai alpha-api
 | Post | linpeas | ✅ |
 | Post | winpeas | ✅ |
 
+## Autopilot (workflow orchestration)
+
+Beyond calling tools one at a time, Alpha-AI can **chain them automatically**. A deterministic
+playbook engine seeds a workflow template, runs the tools, then picks the next tools from what the
+findings reveal — e.g. an open SMB port triggers `enum4linux` + `crackmapexec`; an open Kerberos
+port with domain credentials triggers `kerbrute → secretsdump → bloodhound → certipy`.
+
+Templates: `external-pentest`, `internal-ad`, `web-app`.
+
+```bash
+# REST
+curl -X POST localhost:8000/workflows \
+  -H 'content-type: application/json' \
+  -d '{"target": "10.0.0.10", "template": "internal-ad",
+       "domain": "corp.local", "username": "svc", "password": "P@ssw0rd",
+       "userlist": "/usr/share/wordlists/users.txt"}'
+```
+
+Over MCP, call the `run_workflow` tool with the same fields. The planner is deterministic (no LLM,
+no API cost) and sits behind a `Planner` protocol, so an LLM-driven planner can drop in later.
+Every step runs at most once; findings are de-duplicated across the whole run.
+
 ## Authorization
 
 **Alpha-AI is for authorized security testing only.** Targets must be explicitly listed in `config/targets.yaml` before any tool will run against them. All tool invocations are logged with timestamp, caller, target, command, and result.

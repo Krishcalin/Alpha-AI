@@ -406,6 +406,32 @@ async def winpeas_ingest(target: str) -> dict:
     return result.model_dump(mode="json")
 
 
+@mcp.tool()
+async def run_workflow(
+    target: str,
+    template: str = "external-pentest",
+    domain: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    hashes: str | None = None,
+    userlist: str | None = None,
+    wordlist: str | None = None,
+) -> dict:
+    """Autopilot: seed a workflow template and chain tools from findings deterministically.
+
+    Templates: external-pentest, internal-ad, web-app.
+    """
+    from alpha_ai.agents.orchestrator import Orchestrator
+    from alpha_ai.agents.planner import Engagement
+
+    eng = Engagement(
+        target=target, domain=domain, username=username, password=password,
+        hashes=hashes, userlist=userlist, wordlist=wordlist,
+    )
+    result = await Orchestrator(_dispatch).run(eng, template)
+    return result.model_dump(mode="json")
+
+
 def main() -> None:
     mcp.run()
 

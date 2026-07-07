@@ -14,6 +14,8 @@ def test_builtin_tools_registered() -> None:
         "enum4linux", "crackmapexec", "hydra", "searchsploit",
         # Phase 2 — tool breadth
         "masscan", "subfinder", "nikto", "wpscan", "kerbrute",
+        # Phase 2 — AD block
+        "secretsdump", "certipy", "bloodhound",
     }
     assert expected <= names
 
@@ -24,3 +26,7 @@ def test_builtin_tools_registered() -> None:
     # masscan needs root; kerbrute lights up the AD category
     assert registry.get("masscan").requires_root is True
     assert registry.get("kerbrute").category is ToolCategory.AD
+
+    # the whole AD block shares the AD category
+    for ad_tool in ("secretsdump", "certipy", "bloodhound"):
+        assert registry.get(ad_tool).category is ToolCategory.AD

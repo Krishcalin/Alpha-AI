@@ -111,6 +111,38 @@ class KerbruteRequest(BaseModel):
     use_cache: bool = True
 
 
+class SecretsdumpRequest(BaseModel):
+    target: str
+    domain: str | None = None
+    username: str | None = None
+    password: str | None = None
+    hashes: str | None = None
+    dc_ip: str | None = None
+    just_dc: bool = False
+    use_cache: bool = True
+
+
+class CertipyRequest(BaseModel):
+    target: str
+    domain: str
+    username: str
+    password: str | None = None
+    hashes: str | None = None
+    vulnerable_only: bool = True
+    use_cache: bool = True
+
+
+class BloodhoundRequest(BaseModel):
+    target: str
+    domain: str
+    username: str
+    password: str | None = None
+    hashes: str | None = None
+    collection_method: str = "Default"
+    nameserver: str | None = None
+    use_cache: bool = True
+
+
 class Enum4linuxRequest(BaseModel):
     target: str
     aggressive: bool = False
@@ -291,6 +323,50 @@ async def run_kerbrute(req: KerbruteRequest) -> dict:
         userlist=req.userlist,
         password=req.password,
         dc=req.dc,
+    )
+
+
+@app.post("/tools/secretsdump")
+async def run_secretsdump(req: SecretsdumpRequest) -> dict:
+    return await _invoke(
+        "secretsdump",
+        req.target,
+        use_cache=req.use_cache,
+        domain=req.domain,
+        username=req.username,
+        password=req.password,
+        hashes=req.hashes,
+        dc_ip=req.dc_ip,
+        just_dc=req.just_dc,
+    )
+
+
+@app.post("/tools/certipy")
+async def run_certipy(req: CertipyRequest) -> dict:
+    return await _invoke(
+        "certipy",
+        req.target,
+        use_cache=req.use_cache,
+        domain=req.domain,
+        username=req.username,
+        password=req.password,
+        hashes=req.hashes,
+        vulnerable_only=req.vulnerable_only,
+    )
+
+
+@app.post("/tools/bloodhound")
+async def run_bloodhound(req: BloodhoundRequest) -> dict:
+    return await _invoke(
+        "bloodhound",
+        req.target,
+        use_cache=req.use_cache,
+        domain=req.domain,
+        username=req.username,
+        password=req.password,
+        hashes=req.hashes,
+        collection_method=req.collection_method,
+        nameserver=req.nameserver,
     )
 
 

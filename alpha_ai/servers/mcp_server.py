@@ -269,6 +269,76 @@ async def kerbrute_scan(
 
 
 @mcp.tool()
+async def secretsdump_scan(
+    target: str,
+    domain: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    hashes: str | None = None,
+    dc_ip: str | None = None,
+    just_dc: bool = False,
+) -> dict:
+    """Dump SAM/LSA/NTDS credentials (NTLM hashes, DCSync) with impacket-secretsdump."""
+    result = await _dispatch.run_tool(
+        "secretsdump",
+        target=target,
+        domain=domain,
+        username=username,
+        password=password,
+        hashes=hashes,
+        dc_ip=dc_ip,
+        just_dc=just_dc,
+    )
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
+async def certipy_scan(
+    target: str,
+    domain: str,
+    username: str,
+    password: str | None = None,
+    hashes: str | None = None,
+    vulnerable_only: bool = True,
+) -> dict:
+    """Enumerate ADCS templates/CAs and flag ESC1-ESC8 misconfigurations with certipy."""
+    result = await _dispatch.run_tool(
+        "certipy",
+        target=target,
+        domain=domain,
+        username=username,
+        password=password,
+        hashes=hashes,
+        vulnerable_only=vulnerable_only,
+    )
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
+async def bloodhound_scan(
+    target: str,
+    domain: str,
+    username: str,
+    password: str | None = None,
+    hashes: str | None = None,
+    collection_method: str = "Default",
+    nameserver: str | None = None,
+) -> dict:
+    """Collect AD objects/ACLs/sessions for BloodHound attack-path mapping (bloodhound-python)."""
+    result = await _dispatch.run_tool(
+        "bloodhound",
+        target=target,
+        domain=domain,
+        username=username,
+        password=password,
+        hashes=hashes,
+        collection_method=collection_method,
+        nameserver=nameserver,
+    )
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
 async def searchsploit_search(
     query: str,
     exclude: str | None = None,

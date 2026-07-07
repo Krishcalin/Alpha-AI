@@ -83,6 +83,9 @@ docker run -it --rm -p 8000:8000 alpha-ai alpha-api
 | Network | enum4linux | ✅ |
 | Network | crackmapexec | ✅ |
 | AD | kerbrute | ✅ |
+| AD | secretsdump | ✅ |
+| AD | certipy | ✅ |
+| AD | bloodhound | ✅ |
 | Cred | hydra | ✅ |
 | Exploit | searchsploit | ✅ |
 

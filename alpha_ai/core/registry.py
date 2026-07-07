@@ -66,5 +66,8 @@ def load_builtin_tools() -> None:
     from alpha_ai.tools.network import enum4linux as _enum4linux  # noqa: F401
     from alpha_ai.tools.network import crackmapexec as _crackmapexec  # noqa: F401
     from alpha_ai.tools.ad import kerbrute as _kerbrute  # noqa: F401
+    from alpha_ai.tools.ad import secretsdump as _secretsdump  # noqa: F401
+    from alpha_ai.tools.ad import certipy as _certipy  # noqa: F401
+    from alpha_ai.tools.ad import bloodhound as _bloodhound  # noqa: F401
     from alpha_ai.tools.cred import hydra as _hydra  # noqa: F401
     from alpha_ai.tools.exploit import searchsploit as _searchsploit  # noqa: F401

@@ -14,7 +14,7 @@ enum4linux, crackmapexec, hydra, searchsploit, …) are expected on `$PATH`.
 **Repository**: https://github.com/Krishcalin/Alpha-AI
 **License**: MIT
 **Python**: 3.11+
-**Status**: Phase 2 in progress — 17 tools wrapped (recon, web, network, AD, cred, exploit), 42 tests passing (excl. Linux-only runner tests)
+**Status**: Phase 2 in progress — 19 tools wrapped (recon, web, network, AD, cred, exploit), 47 tests passing (excl. Linux-only runner tests)
 
 ---
 
@@ -152,9 +152,11 @@ subclass) if the target is not whitelisted. The REST API maps this to HTTP 403.
 | AD       | certipy      | `tools/ad/certipy.py`                          | CRITICAL per ADCS ESC* misconfiguration           |
 | AD       | bloodhound   | `tools/ad/bloodhound.py`                       | INFO collection summary + `.zip` artifact pointer |
 | Cred     | hydra        | `tools/cred/hydra.py`                        | Always CRITICAL on valid credentials              |
+| Cred     | john         | `tools/cred/john.py` (local-only)            | CRITICAL per cracked plaintext credential         |
+| Cred     | hashcat      | `tools/cred/hashcat.py` (local-only)         | CRITICAL per cracked hash (`--quiet` hash:plain)  |
 | Exploit  | searchsploit | `tools/exploit/searchsploit.py` (local-only) | webapps/remote → HIGH, local/dos → MEDIUM         |
 
-**17 tools, all flow through the same dispatcher.**
+**19 tools, all flow through the same dispatcher.**
 
 ---
 
@@ -355,7 +357,7 @@ curl http://localhost:8000/health
 - [ ] Recon: masscan ✅, subfinder ✅, amass, dnsrecon
 - [ ] Web: nikto ✅, wpscan ✅, wfuzz
 - [x] AD: kerbrute ✅, impacket-secretsdump ✅, certipy ✅, bloodhound-python ✅
-- [ ] Cred: john, hashcat (local-only — `requires_authorization=False`)
+- [x] Cred: john ✅, hashcat ✅ (local-only — `requires_authorization=False`)
 - [ ] Post: linpeas/winpeas wrappers (require uploaded result file)
 
 First batch (5 tools) complete: `masscan`, `subfinder` (recon), `nikto`, `wpscan` (web),
@@ -364,6 +366,10 @@ First batch (5 tools) complete: `masscan`, `subfinder` (recon), `nikto`, `wpscan
 AD batch (3 tools) complete: `secretsdump` (hash dump / DCSync), `certipy` (ADCS ESC1-ESC8),
 `bloodhound` (attack-path collection) — the full kerbrute→secretsdump→bloodhound→certipy chain.
 +9 parser/registry tests (`tests/test_parsers_phase5.py`).
+
+Cred batch (2 tools) complete: `john`, `hashcat` — local-only offline crackers
+(`requires_authorization=False`, target is the hash file). Closes the loop from
+secretsdump: dumped NTLM hashes → cracked plaintext. +6 parser tests (`tests/test_parsers_phase6.py`).
 
 ### Phase 3 — Orchestration
 - [ ] `agents/autopilot.py` — LLM-driven loop that picks the next tool from prior findings

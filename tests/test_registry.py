@@ -16,6 +16,8 @@ def test_builtin_tools_registered() -> None:
         "masscan", "subfinder", "nikto", "wpscan", "kerbrute",
         # Phase 2 — AD block
         "secretsdump", "certipy", "bloodhound",
+        # Phase 2 — Cred block (local-only crackers)
+        "john", "hashcat",
     }
     assert expected <= names
 

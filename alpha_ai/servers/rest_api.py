@@ -177,6 +177,23 @@ class HydraRequest(BaseModel):
     use_cache: bool = True
 
 
+class JohnRequest(BaseModel):
+    target: str
+    wordlist: str = "/usr/share/wordlists/rockyou.txt"
+    hash_format: str | None = None
+    rules: bool = False
+    use_cache: bool = True
+
+
+class HashcatRequest(BaseModel):
+    target: str
+    mode: int = 1000
+    wordlist: str = "/usr/share/wordlists/rockyou.txt"
+    attack_mode: int = 0
+    rules: str | None = None
+    use_cache: bool = True
+
+
 class SearchsploitRequest(BaseModel):
     query: str
     exclude: str | None = None
@@ -413,6 +430,31 @@ async def run_hydra(req: HydraRequest) -> dict:
         port=req.port,
         threads=req.threads,
         stop_on_first=req.stop_on_first,
+    )
+
+
+@app.post("/tools/john")
+async def run_john(req: JohnRequest) -> dict:
+    return await _invoke(
+        "john",
+        req.target,
+        use_cache=req.use_cache,
+        wordlist=req.wordlist,
+        hash_format=req.hash_format,
+        rules=req.rules,
+    )
+
+
+@app.post("/tools/hashcat")
+async def run_hashcat(req: HashcatRequest) -> dict:
+    return await _invoke(
+        "hashcat",
+        req.target,
+        use_cache=req.use_cache,
+        mode=req.mode,
+        wordlist=req.wordlist,
+        attack_mode=req.attack_mode,
+        rules=req.rules,
     )
 
 

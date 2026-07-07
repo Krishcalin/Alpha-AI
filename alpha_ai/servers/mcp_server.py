@@ -339,6 +339,44 @@ async def bloodhound_scan(
 
 
 @mcp.tool()
+async def john_crack(
+    target: str,
+    wordlist: str = "/usr/share/wordlists/rockyou.txt",
+    hash_format: str | None = None,
+    rules: bool = False,
+) -> dict:
+    """Crack a hash file offline with John the Ripper (local-only; target is the hash file)."""
+    result = await _dispatch.run_tool(
+        "john",
+        target=target,
+        wordlist=wordlist,
+        hash_format=hash_format,
+        rules=rules,
+    )
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
+async def hashcat_crack(
+    target: str,
+    mode: int = 1000,
+    wordlist: str = "/usr/share/wordlists/rockyou.txt",
+    attack_mode: int = 0,
+    rules: str | None = None,
+) -> dict:
+    """Crack a hash file offline with hashcat (local-only; target is the hash file)."""
+    result = await _dispatch.run_tool(
+        "hashcat",
+        target=target,
+        mode=mode,
+        wordlist=wordlist,
+        attack_mode=attack_mode,
+        rules=rules,
+    )
+    return result.model_dump(mode="json")
+
+
+@mcp.tool()
 async def searchsploit_search(
     query: str,
     exclude: str | None = None,

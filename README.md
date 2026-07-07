@@ -87,6 +87,8 @@ docker run -it --rm -p 8000:8000 alpha-ai alpha-api
 | AD | certipy | ✅ |
 | AD | bloodhound | ✅ |
 | Cred | hydra | ✅ |
+| Cred | john | ✅ |
+| Cred | hashcat | ✅ |
 | Exploit | searchsploit | ✅ |
 
 ## Authorization
